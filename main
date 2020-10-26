@@ -1,0 +1,176 @@
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
+import java.util.Scanner;
+
+public class TicTakToe {
+	
+	//making the win condition positions available to all methods 
+	//this is called a global variable since every method can access it 
+	static ArrayList<Integer> playerPositions = new ArrayList<Integer>();
+	static ArrayList<Integer> NPCPositions = new ArrayList<Integer>();
+	
+	public static void main(String[] args) {
+		
+		char [] [] gameBoard = {
+				{' ', '|', ' ', '|', ' '}, 
+				{'-', '+', '-', '+', '-'}, 
+				{' ', '|', ' ', '|', ' '}, 
+				{'-', '+', '-', '+', '-'}, 
+				{' ', '|', ' ', '|', ' '}};
+
+// we comment this out because it would be better to just throw this into a method 
+// this way we can keep better track of out code. However this will work in main
+//		//this will print out our game board using for loops
+//		// for each row inside of the game board
+//		for(char[] row : gameBoard) {
+//			// for each symbol inside of the row
+//			for(char c : row) {
+//				System.out.print(c);
+//			}
+//			//this will print a line after each row to make it look like a board
+//			System.out.println();
+//			
+		printGameBoard(gameBoard);
+		
+		//creates an infinite loop so that the player can keep making their turn 
+		while(true) {
+			//this lets the user input a symbol onto the gameboard 
+			Scanner scan = new Scanner(System.in);
+			System.out.println("Enter your placement (1-9): ");
+			// pos = position 
+			int playerPos = scan.nextInt();
+			//if the player inputs an incorrect position, don't
+			// the || symbol means logical or 
+			while(playerPositions.contains(playerPos) || NPCPositions.contains(playerPos)) {
+				System.out.println("Position taken! Enter a different position");
+				playerPos = scan.nextInt();
+			}
+			
+			placePiece(gameBoard, playerPos, "player");
+			
+			String result = checkWinner();
+			if(result.length() > 0) {
+				System.out.println(result);
+				printGameBoard(gameBoard);
+				break;
+			}
+			
+			//this creates a random number for the CPU to use for piece placement
+			Random rand = new Random();
+			// we do plus one so it starts with 1 instead of 0
+			int NPCPos = rand.nextInt(9)+1; 
+			while(playerPositions.contains(NPCPos) || NPCPositions.contains(NPCPos)) {
+				NPCPos = rand.nextInt(9)+1;
+			}
+			placePiece(gameBoard, NPCPos, "NPC");
+
+			printGameBoard(gameBoard);
+			
+			result = checkWinner();
+			if(result.length() > 0) {
+				System.out.println(result);
+				printGameBoard(gameBoard);
+				break;
+			}
+
+		}
+	}
+	//this will print out our game board using for loops
+	public static void printGameBoard(char [] [] gameBoard) {
+		// for each row inside of the game board print a symbol
+		for(char[] row : gameBoard) {
+			for(char c : row) {
+				System.out.print(c);
+			}
+			//after each row go to the next line
+			System.out.println();
+		}
+		System.out.println("\n");
+	}
+	
+	public static void placePiece(char [][] gameBoard, int pos, String user) {
+		//creates user to determine if player or NPC
+		char symbol = ' ';
+		if(user.equals("player")) {
+			symbol = 'X';
+			//add to the win condition array 
+			playerPositions.add(pos);
+		} else if(user.equals("NPC")) {
+			symbol = 'O';
+			NPCPositions.add(pos);
+		}
+		
+		// switch case used to allow for easy input
+		switch (pos) {
+			case 1: 
+				gameBoard [0] [0] = symbol; 
+				break;
+				// notice the positions we use
+			case 2: 
+				gameBoard [0] [2] = symbol; 
+				break;
+			case 3: 
+				gameBoard [0] [4] = symbol; 
+				break;
+			case 4: 
+				gameBoard [2] [0] = symbol; 
+				break;
+			case 5: 
+				gameBoard [2] [2] = symbol; 
+				break;
+			case 6: 
+				gameBoard [2] [4] = symbol; 
+				break;
+			case 7: 
+				gameBoard [4] [0] = symbol; 
+				break;
+			case 8: 
+				gameBoard [4] [2] = symbol; 
+				break;
+			case 9: 
+				gameBoard [4] [4] = symbol; 
+				break;
+		}
+	}
+	
+	public static String checkWinner() { 
+		//list the winning conditions 
+		List topRow = Arrays.asList(1, 2, 3);
+		List midRow = Arrays.asList(4, 5, 6);
+		List botRow = Arrays.asList(7, 8, 9);
+		List leftCol = Arrays.asList(1, 4, 7);
+		List midCol = Arrays.asList(2, 5, 8);
+		List rightCol = Arrays.asList(3, 6, 9);
+		List cross1 = Arrays.asList(1, 5, 9);
+		List cross2 = Arrays.asList(7, 5, 3);
+		
+		//we create another list of a list to condense the code
+		//if we were to use just the list above, we would need lines of code 
+		//for every win condition. here we just need a couple of lines for all conditions
+		List<List> winning = new ArrayList<List>();
+		winning.add(topRow);
+		winning.add(midRow);
+		winning.add(botRow);
+		winning.add(leftCol);
+		winning.add(midCol);
+		winning.add(rightCol);
+		winning.add(cross1);
+		winning.add(cross2);
+		
+		//tests to see if player has won 
+		for(List win: winning) {
+			if(playerPositions.containsAll(win)) {
+				return "Congradulations, You won!! \n";
+			} else if(NPCPositions.containsAll(win)) {
+				return "NPC wins. \n"; 
+				//this checks if the board is full which will result in a tie
+			} else if(playerPositions.size()+NPCPositions.size() == 9) {
+				return "TIE! \n";
+			}
+		}
+		return ""; 
+	}
+
+}
